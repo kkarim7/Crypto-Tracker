@@ -1,0 +1,7 @@
+{
+  "name": "crypto-tracker",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react"
+}
