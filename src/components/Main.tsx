@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   IonPage,
@@ -12,7 +12,6 @@ import {
   IonCardHeader,
   IonCardContent,
   IonCardSubtitle,
-  IonInput,
   IonLabel,
   IonItem,
   IonToolbar,
@@ -23,48 +22,77 @@ import {
   IonButton,
   IonButtons,
   IonList,
+  IonSearchbar,
 } from "@ionic/react";
-import { menuOutline } from "ionicons/icons";
+import { listOutline } from "ionicons/icons";
+import { XYPlot, AreaSeries, ChartLabel, XAxis, YAxis } from "react-vis";
+
 import "./Main.css";
 
-const API_KEY = "ENTER YOUR API KEY HERE";
+const API_KEY = "ENTER YOUR API KEY";
 
 const Main: React.FC = () => {
   const [searchTicker, setSearchTicker] = useState<string>();
   const [searchTickerData, setSearchTickerData] = useState<any>();
   const [arrayTicker, setArrayTicker] = useState<[]>();
+  const [batchTickerData, setBatchTickerData] = useState<[]>();
   const [allTickerData, setAllTickerData] = useState<[]>();
   const [showPopOver, setShowPopOver] = useState<boolean>(false);
 
-  const searchCryptoRef = useRef<HTMLIonInputElement>(null);
+  const [totalMarketCap, setTotalMarketCap] = useState<[]>();
+  const [totalVolume, setTotalVolume] = useState<[]>();
 
   useEffect(() => {
     axios
       .get("https://api.nomics.com/v1/currencies/ticker?key=" + API_KEY)
       .then((response) => {
         setArrayTicker(response.data.slice(0, 12));
-        setAllTickerData(response.data.slice(0, 50));
-
-        if (searchTicker) {
-          const foundTicker = response.data.find(
-            (ticker: any) => ticker.id === searchTicker
-          );
-          setSearchTickerData(foundTicker);
-        }
-
-        console.log(response.data);
+        setBatchTickerData(response.data.slice(0, 50));
+        setAllTickerData(response.data);
       })
       .catch((error) => {});
-  }, [searchTicker]);
 
-  const search = (event: CustomEvent) => {
-    if (event.detail.value !== undefined) {
-      const ticker: string = event.detail.value;
-      const tickerSearch = ticker.toUpperCase();
-      setSearchTicker(tickerSearch);
+    // const date = new Date();
+
+    // const endDate = date.toJSON();
+
+    // const startDate = date.getTime() - 604800000;
+
+    // const Day7 = new Date(startDate).toJSON();
+
+    //GET TOTAL MARKET CAP
+    axios
+      .get(
+        "https://api.nomics.com/v1/market-cap/history?key=" +
+          API_KEY +
+          "&start=2020-10-02T00%3A00%3A00Z&end=2020-10-31T00%3A00%3A00Z"
+      )
+      .then((response) => {
+        setTotalMarketCap(response.data);
+      })
+      .catch((error) => {});
+
+    //GET TOTAL VOLUME
+    axios
+      .get(
+        "https://api.nomics.com/v1/volume/history?key=" +
+          API_KEY +
+          "&start=2020-10-02T00%3A00%3A00Z&end=2020-10-31T00%3A00%3A00Z"
+      )
+      .then((response) => {
+        setTotalVolume(response.data);
+      })
+      .catch((error) => {});
+  }, []);
+
+  useEffect(() => {
+    if (searchTicker) {
+      const foundTicker = allTickerData!.find(
+        (ticker: any) => ticker.id === searchTicker
+      );
+      setSearchTickerData(foundTicker);
     }
-    return;
-  };
+  }, [searchTicker, allTickerData]);
 
   let colSz = "3";
   if (isPlatform("android") || isPlatform("ios")) {
@@ -117,6 +145,39 @@ const Main: React.FC = () => {
     colSearchOff = "0";
   }
 
+  const dataMarket: any = [];
+
+  if (totalMarketCap) {
+    totalMarketCap.map((market: any) => {
+      let x = new Date(market.timestamp).getDate();
+      let y = parseInt(market.market_cap) * 0.000000001;
+      return dataMarket.push({
+        x: x,
+        y: y,
+      });
+    });
+  }
+
+  const dataVolume: any = [];
+
+  if (totalVolume) {
+    totalVolume.map((market: any) => {
+      let x = new Date(market.timestamp).getDate();
+      let y = parseInt(market.volume) * 0.00000001;
+      return dataVolume.push({
+        x: x,
+        y: y,
+      });
+    });
+  }
+
+  let plotHeight = 200;
+  let plotWidth = 400;
+
+  if (isPlatform("android") || isPlatform("ios")) {
+    plotWidth = 325;
+  }
+
   return (
     <IonPage className="Main">
       <IonHeader className="ion-text-center">
@@ -126,29 +187,104 @@ const Main: React.FC = () => {
       </IonHeader>
       <IonContent>
         <IonGrid>
+          {/* INSERT GRAPH HERE */}
+          <IonRow>
+            <IonCol className="ion-text-center">
+              <IonCard>
+                <IonCardHeader>Total Market Cap</IonCardHeader>
+                <IonCardContent className="ion-text-center">
+                  <XYPlot height={plotHeight} width={plotWidth}>
+                    <YAxis top={0} />
+                    <XAxis marginTop={15} tickLabelAngle={15} />
+                    <ChartLabel
+                      text="X Axis"
+                      className="alt-x-label"
+                      includeMargin={false}
+                      xPercent={0.025}
+                      yPercent={1.01}
+                    />
+                    <ChartLabel
+                      text="Y Axis"
+                      className="alt-y-label"
+                      includeMargin={false}
+                      xPercent={0.06}
+                      yPercent={0.06}
+                      style={{
+                        transform: "rotate(-90)",
+                        textAnchor: "end",
+                      }}
+                    />
+                    <AreaSeries
+                      data={dataMarket}
+                      style={{
+                        fill: "none",
+                      }}
+                    />
+                  </XYPlot>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+            <IonCol className="ion-text-center">
+              <IonCard>
+                <IonCardHeader>Total Volume</IonCardHeader>
+                <IonCardContent className="ion-text-center">
+                  <XYPlot height={plotHeight} width={plotWidth}>
+                    <YAxis tickFormat={(d) => `${d}`} top={0} />
+                    <XAxis
+                      tickFormat={(d) => `${d}`}
+                      marginTop={15}
+                      tickLabelAngle={15}
+                    />
+                    <ChartLabel
+                      text="X Axis"
+                      className="alt-x-label"
+                      includeMargin={false}
+                      xPercent={0.025}
+                      yPercent={1.01}
+                    />
+                    <ChartLabel
+                      text="Y Axis"
+                      className="alt-y-label"
+                      includeMargin={false}
+                      xPercent={0.06}
+                      yPercent={0.06}
+                      style={{
+                        transform: "rotate(-90)",
+                        textAnchor: "end",
+                      }}
+                    />
+                    <AreaSeries data={dataVolume} />
+                  </XYPlot>
+                </IonCardContent>
+              </IonCard>
+            </IonCol>
+          </IonRow>
+          <IonRow>
+            <IonCol>
+              <IonItem>
+                <IonSearchbar
+                  color="primary"
+                  placeholder="Search Ticker"
+                  value={searchTicker}
+                  onIonChange={(e) =>
+                    setSearchTicker(e.detail.value!.toUpperCase())
+                  }
+                ></IonSearchbar>
+                <IonButtons className="ion-margin" slot="end">
+                  <IonButton onClick={() => setShowPopOver(true)}>
+                    <IonIcon
+                      color="secondary"
+                      slot="icon-only"
+                      icon={listOutline}
+                    />
+                  </IonButton>
+                </IonButtons>
+              </IonItem>
+            </IonCol>
+          </IonRow>
           <IonRow>
             <IonCol>
               <IonCard>
-                <IonItem color="primary">
-                  <IonLabel position="floating">
-                    <h2>Search Tickers</h2>
-                  </IonLabel>
-                  <IonInput
-                    type="text"
-                    ref={searchCryptoRef}
-                    value={searchTicker}
-                    onIonChange={search}
-                  />
-                  <IonButtons slot="end">
-                    <IonButton onClick={() => setShowPopOver(true)}>
-                      <IonIcon
-                        color="secondary"
-                        slot="icon-only"
-                        icon={menuOutline}
-                      />
-                    </IonButton>
-                  </IonButtons>
-                </IonItem>
                 <IonPopover
                   isOpen={showPopOver}
                   onDidDismiss={(e) => setShowPopOver(false)}
@@ -156,8 +292,8 @@ const Main: React.FC = () => {
                 >
                   <p>List of Tickers</p>
                   <IonList>
-                    {allTickerData &&
-                      allTickerData.map((crypto: any) => (
+                    {batchTickerData &&
+                      batchTickerData.map((crypto: any) => (
                         <IonItem
                           key={crypto.id}
                           onClick={() => {
@@ -186,14 +322,20 @@ const Main: React.FC = () => {
                               API_KEY
                           )
                           .then((response) => {
-                            setAllTickerData(
-                              response.data.slice(0, allTickerData!.length + 50)
+                            setBatchTickerData(
+                              response.data.slice(
+                                0,
+                                batchTickerData!.length + 50
+                              )
                             );
                           })
                           .catch((error) => {});
                       }}
                     >
                       Load More ...
+                    </IonButton>
+                    <IonButton onClick={() => setShowPopOver(false)}>
+                      Close
                     </IonButton>
                   </IonList>
                 </IonPopover>
