@@ -9,27 +9,20 @@ import {
   IonRow,
   IonCol,
   IonCard,
-  IonCardHeader,
-  IonCardContent,
-  IonCardSubtitle,
-  IonLabel,
   IonItem,
   IonToolbar,
   isPlatform,
   IonSpinner,
-  IonIcon,
-  IonPopover,
-  IonButton,
-  IonButtons,
-  IonList,
-  IonSearchbar,
 } from "@ionic/react";
-import { listOutline } from "ionicons/icons";
-import { XYPlot, AreaSeries, ChartLabel, XAxis, YAxis } from "react-vis";
 
 import "./Main.css";
+import IonCards from "./IonCards";
+import SegmentButtons from "./SegmentButtons";
+import SearchBarAndList from "./SearchBarAndList";
+import PopOver from "./PopOver";
+import Plots from "./Plots";
 
-const API_KEY = "ENTER YOUR API KEY";
+const API_KEY = "ENTER YOUR API KEY HERE";
 
 const Main: React.FC = () => {
   const [searchTicker, setSearchTicker] = useState<string>();
@@ -39,8 +32,12 @@ const Main: React.FC = () => {
   const [allTickerData, setAllTickerData] = useState<[]>();
   const [showPopOver, setShowPopOver] = useState<boolean>(false);
 
+  //MANAGE PLOTS STATE
   const [totalMarketCap, setTotalMarketCap] = useState<[]>();
   const [totalVolume, setTotalVolume] = useState<[]>();
+
+  //MANAGE TIME SCALE OF PLOTS
+  const [changeDate, setChangeDate] = useState<number>(86400000);
 
   useEffect(() => {
     axios
@@ -52,20 +49,23 @@ const Main: React.FC = () => {
       })
       .catch((error) => {});
 
-    // const date = new Date();
+    const date = new Date();
 
-    // const endDate = date.toJSON();
+    const endDate = date.toJSON();
 
-    // const startDate = date.getTime() - 604800000;
+    const sDate = date.getTime() - changeDate;
 
-    // const Day7 = new Date(startDate).toJSON();
+    const startDate = new Date(sDate).toJSON();
 
     //GET TOTAL MARKET CAP
     axios
       .get(
         "https://api.nomics.com/v1/market-cap/history?key=" +
           API_KEY +
-          "&start=2020-10-02T00%3A00%3A00Z&end=2020-10-31T00%3A00%3A00Z"
+          "&start=" +
+          startDate +
+          "&end=" +
+          endDate
       )
       .then((response) => {
         setTotalMarketCap(response.data);
@@ -77,13 +77,16 @@ const Main: React.FC = () => {
       .get(
         "https://api.nomics.com/v1/volume/history?key=" +
           API_KEY +
-          "&start=2020-10-02T00%3A00%3A00Z&end=2020-10-31T00%3A00%3A00Z"
+          "&start=" +
+          startDate +
+          "&end=" +
+          endDate
       )
       .then((response) => {
         setTotalVolume(response.data);
       })
       .catch((error) => {});
-  }, []);
+  }, [changeDate]);
 
   useEffect(() => {
     if (searchTicker) {
@@ -119,18 +122,13 @@ const Main: React.FC = () => {
       <IonRow>
         {arrayTicker.map((ticker: any) => (
           <IonCol key={ticker.id} className="ion-text-center" size={colSz}>
-            <IonCard color="primary">
-              <img
-                className="ion-padding-top"
-                src={ticker.logo_url}
-                alt={ticker.name}
-              />
-              <IonCardHeader>
-                {ticker.id} ({ticker.name})
-              </IonCardHeader>
-              <IonCardSubtitle>$ {ticker.price}</IonCardSubtitle>
-              <IonCardContent></IonCardContent>
-            </IonCard>
+            <IonCards
+              classColor="primary"
+              title={`${ticker.id} (${ticker.name})`}
+              content={`$ ${ticker.price}`}
+            >
+              <img src={ticker.logo_url} alt={ticker.name} />
+            </IonCards>
           </IonCol>
         ))}
       </IonRow>
@@ -145,39 +143,6 @@ const Main: React.FC = () => {
     colSearchOff = "0";
   }
 
-  const dataMarket: any = [];
-
-  if (totalMarketCap) {
-    totalMarketCap.map((market: any) => {
-      let x = new Date(market.timestamp).getDate();
-      let y = parseInt(market.market_cap) * 0.000000001;
-      return dataMarket.push({
-        x: x,
-        y: y,
-      });
-    });
-  }
-
-  const dataVolume: any = [];
-
-  if (totalVolume) {
-    totalVolume.map((market: any) => {
-      let x = new Date(market.timestamp).getDate();
-      let y = parseInt(market.volume) * 0.00000001;
-      return dataVolume.push({
-        x: x,
-        y: y,
-      });
-    });
-  }
-
-  let plotHeight = 200;
-  let plotWidth = 400;
-
-  if (isPlatform("android") || isPlatform("ios")) {
-    plotWidth = 325;
-  }
-
   return (
     <IonPage className="Main">
       <IonHeader className="ion-text-center">
@@ -188,157 +153,45 @@ const Main: React.FC = () => {
       <IonContent>
         <IonGrid>
           {/* INSERT GRAPH HERE */}
+          <Plots totMarkCap={totalMarketCap!} totVol={totalVolume!} />
           <IonRow>
-            <IonCol className="ion-text-center">
-              <IonCard>
-                <IonCardHeader>Total Market Cap</IonCardHeader>
-                <IonCardContent className="ion-text-center">
-                  <XYPlot height={plotHeight} width={plotWidth}>
-                    <YAxis top={0} />
-                    <XAxis marginTop={15} tickLabelAngle={15} />
-                    <ChartLabel
-                      text="X Axis"
-                      className="alt-x-label"
-                      includeMargin={false}
-                      xPercent={0.025}
-                      yPercent={1.01}
-                    />
-                    <ChartLabel
-                      text="Y Axis"
-                      className="alt-y-label"
-                      includeMargin={false}
-                      xPercent={0.06}
-                      yPercent={0.06}
-                      style={{
-                        transform: "rotate(-90)",
-                        textAnchor: "end",
-                      }}
-                    />
-                    <AreaSeries
-                      data={dataMarket}
-                      style={{
-                        fill: "none",
-                      }}
-                    />
-                  </XYPlot>
-                </IonCardContent>
-              </IonCard>
-            </IonCol>
-            <IonCol className="ion-text-center">
-              <IonCard>
-                <IonCardHeader>Total Volume</IonCardHeader>
-                <IonCardContent className="ion-text-center">
-                  <XYPlot height={plotHeight} width={plotWidth}>
-                    <YAxis tickFormat={(d) => `${d}`} top={0} />
-                    <XAxis
-                      tickFormat={(d) => `${d}`}
-                      marginTop={15}
-                      tickLabelAngle={15}
-                    />
-                    <ChartLabel
-                      text="X Axis"
-                      className="alt-x-label"
-                      includeMargin={false}
-                      xPercent={0.025}
-                      yPercent={1.01}
-                    />
-                    <ChartLabel
-                      text="Y Axis"
-                      className="alt-y-label"
-                      includeMargin={false}
-                      xPercent={0.06}
-                      yPercent={0.06}
-                      style={{
-                        transform: "rotate(-90)",
-                        textAnchor: "end",
-                      }}
-                    />
-                    <AreaSeries data={dataVolume} />
-                  </XYPlot>
-                </IonCardContent>
-              </IonCard>
+            <IonCol
+              offset={isPlatform("android") || isPlatform("ios") ? "0" : "3"}
+              size={isPlatform("android") || isPlatform("ios") ? "12" : "6"}
+              className="ion-text-center"
+            >
+              <SegmentButtons
+                ionChange={(e) => setChangeDate(+e.detail.value!)}
+              />
             </IonCol>
           </IonRow>
           <IonRow>
             <IonCol>
               <IonItem>
-                <IonSearchbar
-                  color="primary"
-                  placeholder="Search Ticker"
-                  value={searchTicker}
-                  onIonChange={(e) =>
+                <SearchBarAndList
+                  ticker={searchTicker!}
+                  setTicker={(e) =>
                     setSearchTicker(e.detail.value!.toUpperCase())
                   }
-                ></IonSearchbar>
-                <IonButtons className="ion-margin" slot="end">
-                  <IonButton onClick={() => setShowPopOver(true)}>
-                    <IonIcon
-                      color="secondary"
-                      slot="icon-only"
-                      icon={listOutline}
-                    />
-                  </IonButton>
-                </IonButtons>
+                  setPopOver={() => setShowPopOver(true)}
+                />
               </IonItem>
             </IonCol>
           </IonRow>
           <IonRow>
             <IonCol>
               <IonCard>
-                <IonPopover
-                  isOpen={showPopOver}
-                  onDidDismiss={(e) => setShowPopOver(false)}
-                  cssClass="ion-text-center"
-                >
-                  <p>List of Tickers</p>
-                  <IonList>
-                    {batchTickerData &&
-                      batchTickerData.map((crypto: any) => (
-                        <IonItem
-                          key={crypto.id}
-                          onClick={() => {
-                            setSearchTicker(crypto.id);
-                            setSearchTickerData(crypto);
-                            setShowPopOver(false);
-                          }}
-                        >
-                          <IonLabel>{crypto.id}</IonLabel>
-                          <div
-                            style={{
-                              width: "30px",
-                              height: "30px",
-                              objectFit: "scale-down",
-                            }}
-                          >
-                            <img src={crypto.logo_url} alt={crypto.name} />
-                          </div>
-                        </IonItem>
-                      ))}
-                    <IonButton
-                      onClick={() => {
-                        axios
-                          .get(
-                            "https://api.nomics.com/v1/currencies/ticker?key=" +
-                              API_KEY
-                          )
-                          .then((response) => {
-                            setBatchTickerData(
-                              response.data.slice(
-                                0,
-                                batchTickerData!.length + 50
-                              )
-                            );
-                          })
-                          .catch((error) => {});
-                      }}
-                    >
-                      Load More ...
-                    </IonButton>
-                    <IonButton onClick={() => setShowPopOver(false)}>
-                      Close
-                    </IonButton>
-                  </IonList>
-                </IonPopover>
+                <PopOver
+                  show={showPopOver}
+                  setShow={(e) => setShowPopOver(false)}
+                  batch={batchTickerData!}
+                  setBatch={(e) => setBatchTickerData(e)}
+                  itemClick={(crypto) => {
+                    setSearchTicker(crypto.id);
+                    setSearchTickerData(crypto);
+                    setShowPopOver(false);
+                  }}
+                />
               </IonCard>
             </IonCol>
           </IonRow>
@@ -349,13 +202,12 @@ const Main: React.FC = () => {
                 offset={colSearchOff}
                 size={colSearchSz}
               >
-                <IonCard color="danger">
-                  <IonCardHeader>Ticker Not Found</IonCardHeader>
-                  <IonCardContent>
-                    The ticker you have entered is not valid. Please enter a
-                    valid ticker.
-                  </IonCardContent>
-                </IonCard>
+                <IonCards
+                  title="Ticker Not Found"
+                  classColor="danger"
+                  content="The ticker you have entered is not valid. Please enter a valid
+                  ticker."
+                ></IonCards>
               </IonCol>
             </IonRow>
           )}
@@ -366,16 +218,16 @@ const Main: React.FC = () => {
                 offset={colSearchOff}
                 size={colSearchSz}
               >
-                <IonCard color="tertiary">
+                <IonCards
+                  classColor="tertiary"
+                  title={searchTicker}
+                  content={`$ ${searchTickerData!.price}`}
+                >
                   <img
-                    className="ion-padding-top"
                     src={searchTickerData!.logo_url}
                     alt={searchTickerData!.name}
                   />
-                  <IonCardHeader>{searchTicker}</IonCardHeader>
-                  <IonCardSubtitle>$ {searchTickerData!.price}</IonCardSubtitle>
-                  <IonCardContent></IonCardContent>
-                </IonCard>
+                </IonCards>
               </IonCol>
             </IonRow>
           )}
