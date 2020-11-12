@@ -1,22 +1,30 @@
 import React from "react";
 import {
-  XYPlot,
-  AreaSeries,
+  AreaChart,
+  Line,
+  CartesianGrid,
   XAxis,
   YAxis,
-  VerticalGridLines,
-  HorizontalGridLines,
-  LineMarkSeries,
-} from "react-vis";
-import { isPlatform, IonRow, IonCol } from "@ionic/react";
-import IonCards from "./IonCards";
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+} from "recharts";
+import {
+  isPlatform,
+  IonRow,
+  IonCol,
+  IonCard,
+  IonCardHeader,
+} from "@ionic/react";
 
 const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
+
   let plotHeight = 200;
-  let plotWidth = 450;
+  let colSz = "6";
 
   if (isPlatform("android") || isPlatform("ios")) {
-    plotWidth = 350;
+    colSz = "12";
+    plotHeight = 150;
   }
 
   const dataMarket: any = [];
@@ -37,7 +45,7 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
   if (props.totVol) {
     props.totVol.map((market: any) => {
       let x = new Date(market.timestamp).getTime();
-      let y = parseInt(market.volume) * 0.0000000001;
+      let y = parseInt(market.volume) * 0.000000001;
       return dataVolume.push({
         x: x,
         y: y,
@@ -46,64 +54,62 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
   }
 
   return (
-      <IonRow>
-        <IonCol className="ion-text-center">
-          <IonCards title="Total Market CAP" classColor="clear" content="">
-            <XYPlot height={plotHeight} width={plotWidth}>
-              <VerticalGridLines style={{ stroke: "orchid", opacity: "25%" }} />
-              <HorizontalGridLines
-                style={{ stroke: "orchid", opacity: "25%" }}
-              />
-              <YAxis tickFormat={(d) => ""} left={18} top={0} />
-              <XAxis
-                marginTop={15}
-                tickFormat={(d) => ""}
-                tickLabelAngle={15}
-              />
-              <AreaSeries
+    <IonRow>
+      <IonCol size={colSz}>
+        <IonCard color="clear">
+          <IonCardHeader className="ion-text-center">
+            Total Market CAP
+          </IonCardHeader>
+          <div style={{ height: "100%", width: "95%" }}>
+            <ResponsiveContainer height={plotHeight} width="100%">
+              <AreaChart
                 data={dataMarket}
-                style={{
-                  stroke: "#3880ff",
-                  fill: "#3880ff",
-                  opacity: "70%",
-                }}
-              />
-              <LineMarkSeries
-                data={dataMarket}
-                style={{
-                  stroke: "darkgreen",
-                  fill: "none",
-                  opacity: "70%",
-                }}
-              />
-            </XYPlot>
-          </IonCards>
-        </IonCol>
-        <IonCol className="ion-text-center">
-          <IonCards title="Total Volume" classColor="clear" content="">
-            <XYPlot height={plotHeight} width={plotWidth}>
-              <VerticalGridLines style={{ stroke: "orchid", opacity: "25%" }} />
-              <HorizontalGridLines
-                style={{ stroke: "orchid", opacity: "25%" }}
-              />
-              <YAxis tickFormat={(d) => ""} left={10} top={0} />
-              <XAxis
-                tickFormat={(d) => ""}
-                marginTop={15}
-                tickLabelAngle={15}
-              />
-              <AreaSeries
+                margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+              >
+                <Line type="monotone" dataKey="y" stroke="#3880ff" />
+                <CartesianGrid stroke="#ccc" strokeDasharray="4 4" />
+                <XAxis />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="y"
+                  stroke="#3880ff"
+                  fill="#3880ff"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </IonCard>
+      </IonCol>
+      <IonCol size={colSz}>
+        <IonCard color="clear">
+          <IonCardHeader className="ion-text-center">
+            Total Volume
+          </IonCardHeader>
+          <div style={{ height: "100%", width: "95%" }}>
+            <ResponsiveContainer height={plotHeight} width="100%">
+              <AreaChart
                 data={dataVolume}
-                style={{
-                  stroke: "#3880ff",
-                  fill: "#3880ff",
-                  opacity: "70%",
-                }}
-              />
-            </XYPlot>
-          </IonCards>
-        </IonCol>
-      </IonRow>
+                margin={{ top: 5, right: 20, bottom: 5, left: 0 }}
+              >
+                <Line type="monotone" dataKey="y" stroke="#3880ff" />
+                <CartesianGrid stroke="#ccc" strokeDasharray="4 4" />
+                <XAxis />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="y"
+                  stroke="#3880ff"
+                  fill="#3880ff"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </IonCard>
+      </IonCol>
+    </IonRow>
   );
 };
 

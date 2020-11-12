@@ -56,6 +56,19 @@ const Main: React.FC = () => {
     const sDate = date.getTime() - changeDate;
 
     const startDate = new Date(sDate).toJSON();
+    
+    //Sparkline / Price and volume data per Crypto
+    // axios
+    //   .get(
+    //     "https://api.nomics.com/v1/currencies/sparkline?key=" +
+    //       API_KEY +
+    //       "&ids=BTC,ETH,XRP&start=2020-11-02T00%3A00%3A00Z&end=" +
+    //       endDate
+    //   )
+    //   .then((response) => {
+    //     console.log(response.data);
+    //   })
+    //   .catch((error) => {});
 
     //GET TOTAL MARKET CAP
     axios
@@ -197,11 +210,7 @@ const Main: React.FC = () => {
           </IonRow>
           {searchTicker && searchTickerData === undefined && (
             <IonRow>
-              <IonCol
-                className="ion-text-center"
-                offset={colSearchOff}
-                size={colSearchSz}
-              >
+              <IonCol offset={colSearchOff} size={colSearchSz}>
                 <IonCards
                   title="Ticker Not Found"
                   classColor="danger"
@@ -238,4 +247,4 @@ const Main: React.FC = () => {
   );
 };
 
-export default Main;
+export default React.memo(Main);

@@ -8,7 +8,7 @@ const IonCards: React.FC<{
 }> = (props) => {
   return (
     <IonCard color={props.classColor}>
-      <IonCardHeader>{props.title}</IonCardHeader>
+      <IonCardHeader className="ion-text-center">{props.title}</IonCardHeader>
       {props.children}
       <IonCardContent className="ion-text-center">
         {props.content}

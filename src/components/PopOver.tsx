@@ -27,7 +27,11 @@ const PopOver: React.FC<{
       <IonList>
         {props.batch &&
           props.batch.map((crypto: any) => (
-            <IonItem style={{cursor: "pointer"}} key={crypto.id} onClick={() => props.itemClick(crypto)}>
+            <IonItem
+              style={{ cursor: "pointer" }}
+              key={crypto.id}
+              onClick={() => props.itemClick(crypto)}
+            >
               <IonLabel>{crypto.id}</IonLabel>
               <div
                 style={{
