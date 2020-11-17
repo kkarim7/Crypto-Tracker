@@ -18,7 +18,6 @@ import {
 } from "@ionic/react";
 
 const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
-
   let plotHeight = 200;
   let colSz = "6";
 
@@ -53,6 +52,62 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
     });
   }
 
+  const PlotCustomTooltipMarket = (e: any) => {
+    if (e.active && e.payload != null && e.payload[0] != null) {
+      let day = e.payload[0].payload["x"];
+      let convert = new Date(day);
+      let convert2 = convert.getTime();
+      let display = new Date(convert2);
+      return (
+        <div
+          style={{
+            border: "0.5px solid lightgrey",
+            padding: "1px 10px",
+            backgroundColor: "white",
+          }}
+          className="custom-tooltip"
+        >
+          <p>
+            {display.getDate()}{" "}
+            {display.toLocaleString("default", { month: "short" })}{" "}
+            {display.toLocaleTimeString()}
+          </p>
+          <p>y: {e.payload[0].payload["y"].toFixed(2)}e11</p>
+        </div>
+      );
+    } else {
+      return "";
+    }
+  };
+
+  const PlotCustomTooltipVolume = (e: any) => {
+    if (e.active && e.payload != null && e.payload[0] != null) {
+      let day = e.payload[0].payload["x"];
+      let convert = new Date(day);
+      let convert2 = convert.getTime();
+      let display = new Date(convert2);
+      return (
+        <div
+          style={{
+            border: "0.5px solid lightgrey",
+            padding: "1px 10px",
+            backgroundColor: "white",
+          }}
+          className="custom-tooltip"
+        >
+          <p>
+            {display.getDate()}{" "}
+            {display.toLocaleString("default", { month: "short" })}{" "}
+            {display.toLocaleTimeString()}
+          </p>
+          <p>y: {e.payload[0].payload["y"].toFixed(2)}e16</p>
+        </div>
+      );
+    } else {
+      return "";
+    }
+  };
+
   return (
     <IonRow>
       <IonCol size={colSz}>
@@ -70,7 +125,7 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
                 <CartesianGrid stroke="#ccc" strokeDasharray="4 4" />
                 <XAxis />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={(e: any) => PlotCustomTooltipMarket(e)} />
                 <Area
                   type="monotone"
                   dataKey="y"
@@ -97,7 +152,7 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
                 <CartesianGrid stroke="#ccc" strokeDasharray="4 4" />
                 <XAxis />
                 <YAxis />
-                <Tooltip />
+                <Tooltip content={(e: any) => PlotCustomTooltipVolume(e)} />
                 <Area
                   type="monotone"
                   dataKey="y"
