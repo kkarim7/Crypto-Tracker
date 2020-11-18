@@ -21,6 +21,7 @@ import SegmentButtons from "./SegmentButtons";
 import SearchBarAndList from "./SearchBarAndList";
 import PopOver from "./PopOver";
 import Plots from "./Plots";
+import SearchCardPlots from "./SearchCardPlots";
 
 const API_KEY = "ENTER YOUR API KEY HERE";
 
@@ -43,7 +44,15 @@ const Main: React.FC = () => {
     axios
       .get("https://api.nomics.com/v1/currencies/ticker?key=" + API_KEY)
       .then((response) => {
-        setArrayTicker(response.data.slice(0, 12));
+        setArrayTicker(
+          response.data.filter(
+            (t: any) =>
+              t.id === "BTC" ||
+              t.id === "ETH" ||
+              t.id === "XRP" ||
+              t.id === "LTC"
+          )
+        );
         setBatchTickerData(response.data.slice(0, 50));
         setAllTickerData(response.data);
       })
@@ -56,19 +65,6 @@ const Main: React.FC = () => {
     const sDate = date.getTime() - changeDate;
 
     const startDate = new Date(sDate).toJSON();
-    
-    //Sparkline / Price and volume data per Crypto
-    // axios
-    //   .get(
-    //     "https://api.nomics.com/v1/currencies/sparkline?key=" +
-    //       API_KEY +
-    //       "&ids=BTC,ETH,XRP&start=2020-11-02T00%3A00%3A00Z&end=" +
-    //       endDate
-    //   )
-    //   .then((response) => {
-    //     console.log(response.data);
-    //   })
-    //   .catch((error) => {});
 
     //GET TOTAL MARKET CAP
     axios
@@ -110,7 +106,7 @@ const Main: React.FC = () => {
     }
   }, [searchTicker, allTickerData]);
 
-  let colSz = "3";
+  let colSz = "6";
   if (isPlatform("android") || isPlatform("ios")) {
     colSz = "12";
   }
@@ -204,6 +200,7 @@ const Main: React.FC = () => {
                     setSearchTickerData(crypto);
                     setShowPopOver(false);
                   }}
+                  apiKey={API_KEY}
                 />
               </IonCard>
             </IonCol>
@@ -222,11 +219,7 @@ const Main: React.FC = () => {
           )}
           {searchTicker && searchTickerData !== undefined && (
             <IonRow>
-              <IonCol
-                className="ion-text-center"
-                offset={colSearchOff}
-                size={colSearchSz}
-              >
+              <IonCol className="ion-text-center" size={colSearchSz}>
                 <IonCards
                   classColor="tertiary"
                   title={searchTicker}
@@ -237,6 +230,9 @@ const Main: React.FC = () => {
                     alt={searchTickerData!.name}
                   />
                 </IonCards>
+              </IonCol>
+              <IonCol size={colSearchSz}>
+                <SearchCardPlots Id={searchTicker} apiKey={API_KEY} />
               </IonCol>
             </IonRow>
           )}

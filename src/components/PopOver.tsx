@@ -8,14 +8,13 @@ import {
   IonButton,
 } from "@ionic/react";
 
-const API_KEY = "ENTER YOUR API KEY HERE";
-
 const PopOver: React.FC<{
   show: boolean;
   setShow: (e: any) => void;
   batch: Array<any>;
   setBatch: (e: any) => void;
   itemClick: (c: any) => void;
+  apiKey: string;
 }> = (props) => {
   return (
     <IonPopover
@@ -47,7 +46,7 @@ const PopOver: React.FC<{
         <IonButton
           onClick={() => {
             axios
-              .get("https://api.nomics.com/v1/currencies/ticker?key=" + API_KEY)
+              .get("https://api.nomics.com/v1/currencies/ticker?key=" + props.apiKey)
               .then((response) => {
                 props.setBatch(
                   response.data.slice(0, props.batch!.length + 50)
