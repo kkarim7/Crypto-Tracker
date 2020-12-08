@@ -1,5 +1,5 @@
 # Crypto-Tracker
-An app that allows you to track crypto currency prices and analyze trends of your desired cryptocurrency.
+An app that allows you to track crypto currency prices and analyze trends of your desired cryptocurrency utilizing the **Nomics Cryptocurrency & Bitcoin API**.
 
 # Features
 
