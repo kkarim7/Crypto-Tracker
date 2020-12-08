@@ -7,7 +7,7 @@ Charts that show you total Market Cap and Total Volume of all Cryptocurrencies b
 ![](cryptoCharts.gif)
 
 Search bar that lets you search for over 1000 cryptocurrencies based on their ticker symbol.
-
+![](searchCrypto.gif)
 
 Search List to see which cryptocurrencies are supported.
 
