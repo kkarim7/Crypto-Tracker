@@ -21,10 +21,14 @@ import "@ionic/react/css/display.css";
 import "./theme/variables.css";
 import Main from "./components/Main";
 
-const App: React.FC = () => (
-  <IonApp>
-    <Main />
-  </IonApp>
-);
+const App: React.FC = () => {
+  
+
+  return (
+    <IonApp>
+      <Main />
+    </IonApp>
+  );
+};
 
 export default App;

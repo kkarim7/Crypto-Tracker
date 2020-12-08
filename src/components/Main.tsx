@@ -13,6 +13,8 @@ import {
   IonToolbar,
   isPlatform,
   IonSpinner,
+  IonRefresher,
+  IonRefresherContent,
 } from "@ionic/react";
 
 import "./Main.css";
@@ -22,6 +24,7 @@ import SearchBarAndList from "./SearchBarAndList";
 import PopOver from "./PopOver";
 import Plots from "./Plots";
 import SearchCardPlots from "./SearchCardPlots";
+import { refreshOutline } from "ionicons/icons";
 
 const API_KEY = "ENTER YOUR API KEY HERE";
 
@@ -58,28 +61,11 @@ const Main: React.FC = () => {
       })
       .catch((error) => {});
 
-    const date = new Date();
+    const dateNow = new Date();
 
-    const endDate = date.toJSON();
+    const endDate = dateNow.toJSON();
 
-    const sDate = date.getTime() - changeDate;
-
-    const startDate = new Date(sDate).toJSON();
-
-    //GET TOTAL MARKET CAP
-    axios
-      .get(
-        "https://api.nomics.com/v1/market-cap/history?key=" +
-          API_KEY +
-          "&start=" +
-          startDate +
-          "&end=" +
-          endDate
-      )
-      .then((response) => {
-        setTotalMarketCap(response.data);
-      })
-      .catch((error) => {});
+    const startDate = new Date(dateNow.getTime() - changeDate).toJSON();
 
     //GET TOTAL VOLUME
     axios
@@ -93,6 +79,21 @@ const Main: React.FC = () => {
       )
       .then((response) => {
         setTotalVolume(response.data);
+      })
+      .catch((error) => {});
+
+    //GET TOTAL MARKET CAP
+    axios
+      .get(
+        "https://api.nomics.com/v1/market-cap/history?key=" +
+          API_KEY +
+          "&start=" +
+          startDate +
+          "&end=" +
+          endDate
+      )
+      .then((response) => {
+        setTotalMarketCap(response.data);
       })
       .catch((error) => {});
   }, [changeDate]);
@@ -152,6 +153,12 @@ const Main: React.FC = () => {
     colSearchOff = "0";
   }
 
+  const handleRefresh = (e: CustomEvent<HTMLIonRefresherElement>) => {
+    setTimeout(() => {
+      e.detail.complete();
+    }, 2000);
+  };
+
   return (
     <IonPage className="Main">
       <IonHeader className="ion-text-center">
@@ -160,6 +167,13 @@ const Main: React.FC = () => {
         </IonToolbar>
       </IonHeader>
       <IonContent>
+        <IonRefresher slot="fixed" onIonRefresh={(e: any) => handleRefresh(e)}>
+          <IonRefresherContent
+            pullingIcon={refreshOutline}
+            pullingText="Pull to Refresh"
+            refreshingSpinner="circles"
+          ></IonRefresherContent>
+        </IonRefresher>
         <IonGrid>
           {/* INSERT GRAPH HERE */}
           <Plots totMarkCap={totalMarketCap!} totVol={totalVolume!} />

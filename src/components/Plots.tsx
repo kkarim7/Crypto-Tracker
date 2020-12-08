@@ -18,6 +18,7 @@ import {
 } from "@ionic/react";
 
 const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
+
   let plotHeight = 200;
   let colSz = "6";
 
@@ -31,7 +32,7 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
   if (props.totMarkCap) {
     props.totMarkCap.map((market: any) => {
       let x = new Date(market.timestamp).getTime();
-      let y = parseInt(market.market_cap) * 0.00000000001;
+      let y = parseInt(market.market_cap) * 0.000000001;
       return dataMarket.push({
         x: x,
         y: y,
@@ -39,18 +40,14 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
     });
   }
 
-  const dataVolume: any = [];
-
-  if (props.totVol) {
-    props.totVol.map((market: any) => {
-      let x = new Date(market.timestamp).getTime();
-      let y = parseInt(market.volume) * 0.000000001;
-      return dataVolume.push({
-        x: x,
-        y: y,
-      });
-    });
-  }
+  // if (dataMarket.length > 0) {
+  //   let percentChange =
+  //     ((dataMarket[dataMarket.length - 1].y - dataMarket[0].y) /
+  //       dataMarket[0].y) *
+  //     100;
+  //   console.log(percentChange);
+  //   //return percentChange;
+  // }
 
   const PlotCustomTooltipMarket = (e: any) => {
     if (e.active && e.payload != null && e.payload[0] != null) {
@@ -72,13 +69,26 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
             {display.toLocaleString("default", { month: "short" })}{" "}
             {display.toLocaleTimeString()}
           </p>
-          <p>y: {e.payload[0].payload["y"].toFixed(2)}e11</p>
+          <p>${e.payload[0].payload["y"].toFixed(2)}B</p>
         </div>
       );
     } else {
       return "";
     }
   };
+
+  const dataVolume: any = [];
+
+  if (props.totVol) {
+    props.totVol.map((market: any) => {
+      let x = new Date(market.timestamp).getTime();
+      let y = parseInt(market.volume) * 0.000000001;
+      return dataVolume.push({
+        x: x,
+        y: y,
+      });
+    });
+  }
 
   const PlotCustomTooltipVolume = (e: any) => {
     if (e.active && e.payload != null && e.payload[0] != null) {
@@ -100,7 +110,7 @@ const Plots: React.FC<{ totMarkCap: []; totVol: [] }> = (props) => {
             {display.toLocaleString("default", { month: "short" })}{" "}
             {display.toLocaleTimeString()}
           </p>
-          <p>y: {e.payload[0].payload["y"].toFixed(2)}e16</p>
+          <p>${e.payload[0].payload["y"].toFixed(2)}B</p>
         </div>
       );
     } else {
