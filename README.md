@@ -10,6 +10,6 @@ Search bar that lets you search for over 1000 cryptocurrencies based on their ti
 ![](searchCrypto.gif)
 
 Search List to see which cryptocurrencies are supported.
-
+![](searchCryptoList.gif)
 
 Analyze the trends of your selected cryptocurrency.
