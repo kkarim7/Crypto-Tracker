@@ -1,7 +1,7 @@
 # Crypto-Tracker
 An app that allows you to track crypto currency prices and analyze trends of your desired cryptocurrency.
 
-Features
+# Features
 
 Charts that show you total Market Cap and Total Volume of all Cryptocurrencies being traded.
 
